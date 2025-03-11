@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelos para o sistema de orçamentos
+model Usuario {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  senha     String
+  nome      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cliente {
+  id         Int         @id @default(autoincrement())
+  nome       String
+  email      String?
+  telefone   String?
+  cpf        String?
+  cnpj       String?
+  tipo       String      @default("PF")
+  orcamentos Orcamento[]
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+}
+
+model Produto {
+  id             Int             @id @default(autoincrement())
+  nome           String
+  descricao      String?
+  preco          Float
+  itensOrcamento ItemOrcamento[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Orcamento {
+  id          Int             @id @default(autoincrement())
+  numero      String          @unique
+  data        DateTime        @default(now())
+  validade    DateTime?
+  status      String          @default("pendente") // pendente, aprovado, rejeitado
+  observacoes String?
+  clienteId   Int
+  cliente     Cliente         @relation(fields: [clienteId], references: [id])
+  itens       ItemOrcamento[]
+  valorTotal  Float           @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+model ItemOrcamento {
+  id            Int       @id @default(autoincrement())
+  quantidade    Int
+  valorUnitario Float
+  desconto      Float?    @default(0)
+  orcamentoId   Int
+  orcamento     Orcamento @relation(fields: [orcamentoId], references: [id])
+  produtoId     Int
+  produto       Produto   @relation(fields: [produtoId], references: [id])
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
